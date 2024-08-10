@@ -2,7 +2,7 @@
 Sparse Label Smoothing Regularization
 </h1>
 
-This repository contains PyTorch code for the Sparse Label Smoothing Regularization (SparseLSR) loss function proposed in the paper "[Learning Symbolic Model-Agnostic Loss Functions via Meta-Learning](https://arxiv.org/abs/2209.08907)" by Christian Raymond, Qi Chen, Bing Xue, and Mengjie Zhang.
+This repository contains PyTorch code for the Sparse Label Smoothing Regularization (SparseLSR) loss function proposed in the paper "[Learning Symbolic Model-Agnostic Loss Functions via Meta-Learning](https://arxiv.org/abs/2209.08907)" by Christian Raymond, Qi Chen, Bing Xue, and Mengjie Zhang. The SparseLSR loss function is a significantly faster and more memory-efficient way to compute Label Smoothing Regularization (LSR).
 
 <p align="center">
   <img src="https://github.com/Decadz/Sparse-Label-Smoothing-Regularization/blob/main/images/sparse-lsr.png" width="800"/>
@@ -10,6 +10,11 @@ This repository contains PyTorch code for the Sparse Label Smoothing Regularizat
 
 ## Contents
 
+A PyTorch implementation of the proposed Sparse Label Smoothing Regularization (SparseLSR) loss function. This repository contains the following useful scripts:
+
+- ```loss_functions.py``` - PyTorch code containing an implementation of SparseLSR and conventional LSR.
+- ```visualizations.py``` - Script for visualizing the different classification loss functions.
+- ```example.py``` - Code for testing the different loss functions and visualizing the penultimate layer representations.
 
 ## Installation
 
@@ -124,13 +129,7 @@ class SparseLSRLoss(torch.nn.Module):
         return loss.mean() if self.reduction == "mean" else loss
 ```
 
-### Code Reproducibility: 
-
-The code has not been comprehensively checked and re-run since refactoring. If you're having any issues, find
-a problem/bug or cannot reproduce similar results as the paper please [open an issue](https://github.com/Decadz/Sparse-Label-Smoothing-Regularization/issues)
-or email me.
-
-## Reference
+## References
 
 If you use our library or find our research of value please consider citing our papers with the following Bibtex entry:
 
