@@ -8,6 +8,7 @@ import torch
 import tqdm
 import os
 
+from sklearn.model_selection import train_test_split
 from loss_functions import LSRLoss, SparseLSRLoss
 
 # Use the GPU/CUDA when available, else use the CPU.
@@ -17,17 +18,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-# Setting the reproducibility seed in PyTorch.
-torch.cuda.manual_seed(1234)
-torch.manual_seed(1234)
-numpy.random.seed(1234)
-random.seed(1234)
-
 
 def main():
 
     # Loading the CIFAR-10 dataset into memory.
-    training, testing = cifar10()
+    training, validation, testing = cifar10()
 
     # Creating the different loss functions.
     ce = torch.nn.CrossEntropyLoss()
@@ -35,26 +30,37 @@ def main():
     sparse_lsr = SparseLSRLoss(smoothing=0.25)
 
     # Running a training session using different loss functions.
-    for loss_function, file_name in zip([ce, lsr, sparse_lsr], ["ce", "lsr", "sparse_lsr"]):
+    for loss_function, file_name in zip([ce, lsr, sparse_lsr],
+                ["Cross Entropy", "Label Smoothing", "Sparse Label Smoothing"]):
+
+        # Setting the reproducibility seed in PyTorch.
+        torch.cuda.manual_seed(0)
+        torch.manual_seed(0)
+        numpy.random.seed(0)
+        random.seed(0)
 
         # Creating the AlexNet model.
         model = AlexNet().to(device)
 
         # Training the model using a basic training loop.
-        train(model, training, loss_function, gradient_steps=100000)
+        train(model, training, loss_function, gradient_steps=150000)
 
         # Calculating the training and testing accuracy.
-        print(round(evaluate(model, training), 4), "%")
-        print(round(evaluate(model, testing), 4), "%")
+        training_accuracy = evaluate(model, training)
+        testing_accuracy = evaluate(model, testing)
+        print("Training Accuracy:", round(training_accuracy, 4), "%")
+        print("Testing Accuracy:", round(testing_accuracy, 4), "%")
 
         # Plotting the penultimate layer representation using TSNE.
-        plot_penultimate_representation(model, testing, file_name)
+        plot_penultimate_representation(model, testing, file_name, testing_accuracy)
 
 
 def cifar10():
 
     """
-    Loading the CIFAR-10 dataset into memory using torchvision.
+    Loading the CIFAR-10 dataset into memory using TorchVision. Using
+    the same partitioning strategy as what is used in the original
+    papers figures.
     """
 
     # Finding the current directory of this file.
@@ -78,7 +84,18 @@ def cifar10():
         ])
     )
 
-    return training, testing
+    # Partitioning the data into training and validation sets.
+    train_indices, val_indices, _, _ = train_test_split(
+        range(len(training)),
+        training.targets,
+        stratify=training.targets,
+        test_size=0.1,
+    )
+
+    validation = torch.utils.data.Subset(training, val_indices)
+    training = torch.utils.data.Subset(training, train_indices)
+
+    return training, validation, testing
 
 
 class AlexNet(torch.nn.Module):
@@ -114,11 +131,22 @@ class AlexNet(torch.nn.Module):
             torch.nn.Linear(4096, 10)
         )
 
+        # Initializing the weights of the network.
+        self.reset()
+
+    def reset(self):
+        for module in self.modules():
+            if isinstance(module, torch.nn.Conv2d):
+                torch.nn.init.kaiming_normal_(module.weight)
+            elif isinstance(module, torch.nn.Linear):
+                torch.nn.init.kaiming_normal_(module.weight)
+                module.bias.data.zero_()
+
     def forward(self, x):
         return self.network(x)
 
 
-def train(model, dataset, loss_function, gradient_steps=10000):
+def train(model, dataset, loss_function, gradient_steps):
 
     """
     A vanilla training loop which uses stochastic gradient descent to learn the
@@ -131,7 +159,10 @@ def train(model, dataset, loss_function, gradient_steps=10000):
     """
 
     # Creating an optimizer object for learning the model parameter's.
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, nesterov=True)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, nesterov=True, weight_decay=0.0005)
+
+    # Creating a multi-step learning rate scheduler to decay the learning rate.
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[100000, 135000], gamma=0.1)
 
     # Creating a DataLoader to generate samples/batches for each tasks.
     generator = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=True)
@@ -153,6 +184,7 @@ def train(model, dataset, loss_function, gradient_steps=10000):
         # Performing the backward pass and gradient step/update.
         loss.backward()
         optimizer.step()
+        scheduler.step()
 
         # Recording the training accuracy.
         accuracy = (y_pred.argmax(dim=1) == y).float().mean().item() * 100
@@ -194,7 +226,7 @@ def evaluate(model, dataset, batch_size=100):
     return accuracy * 100
 
 
-def plot_penultimate_representation(model, dataset, filename):
+def plot_penultimate_representation(model, dataset, filename, performance):
 
     """
     Function for visualizing the penultimate representation of a neural network
@@ -203,9 +235,13 @@ def plot_penultimate_representation(model, dataset, filename):
     :param model: Base network used for the given task.
     :param dataset: PyTorch DataLoader used for evaluation.
     :param filename: Name of the file to save the figure to.
+    :param performance: The final inference performance of the model.
     """
 
     plt.clf()
+
+    # Adding a title to the plot showing the method and performance.
+    plt.title(filename) #+ " (" + str(round(performance, 4)) + "%" + ")")
 
     # Converting the datasets into a DataLoader.
     generator = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=True)
@@ -241,7 +277,7 @@ def plot_penultimate_representation(model, dataset, filename):
     # Plotting the penultimate layer representation using TSNE.
     embedding = TSNE(n_components=2).fit_transform(pred_labels)
     plt.scatter(embedding[:, 0], embedding[:, 1], c=true_labels, s=2)
-    plt.savefig(filename + ".png")
+    plt.savefig(filename.lower().replace(" ", "-") + ".png")
 
 
 if __name__ == '__main__':

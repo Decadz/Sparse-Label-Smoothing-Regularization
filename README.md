@@ -14,7 +14,7 @@ A PyTorch implementation of the proposed Sparse Label Smoothing Regularization (
 
 - ```loss_functions.py``` - PyTorch code containing an implementation of SparseLSR and conventional LSR.
 - ```visualizations.py``` - Script for visualizing the different classification loss functions.
-- ```example.py``` - Code for testing the different loss functions and visualizing the penultimate layer representations.
+- ```train.py``` - Code for testing the different loss functions and visualizing the penultimate layer representations.
 
 ## Installation
 
@@ -128,6 +128,10 @@ class SparseLSRLoss(torch.nn.Module):
         # Applying the reduction and returning.
         return loss.mean() if self.reduction == "mean" else loss
 ```
+
+### Code Reproducibility: 
+
+The code has not been comprehensively checked and re-run since refactoring. If you're having any issues, find a problem/bug or cannot reproduce similar results as the paper please [open an issue](https://github.com/Decadz/Sparse-Label-Smoothing-Regularization/issues) or email me.
 
 ## References
 
