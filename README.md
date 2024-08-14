@@ -129,7 +129,7 @@ class SparseLSRLoss(torch.nn.Module):
         return loss.mean() if self.reduction == "mean" else loss
 ```
 
-### Visualizing Penultimate Layer Representation
+### Visualizing Penultimate Layer Representations
 
 The ```train.py``` script allows you to recreate the penultimate layer representation visualizations from the paper's appendix. In this script, AlexNet is trained on the CIFAR-10 dataset using the cross-entropy loss, label smoothing regularization, and sparse label smoothing regularization. After training, the penultimate layer representations on the testing set are visualized using [t-distributed Stochastic Neighbor Embedding](https://jmlr.org/papers/v9/vandermaaten08a.html) (t-SNE).
 
