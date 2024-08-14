@@ -2,7 +2,7 @@
 Sparse Label Smoothing Regularization
 </h1>
 
-This repository contains PyTorch code for the Sparse Label Smoothing Regularization (SparseLSR) loss function proposed in the paper "[Learning Symbolic Model-Agnostic Loss Functions via Meta-Learning](https://arxiv.org/abs/2209.08907)" by Christian Raymond, Qi Chen, Bing Xue, and Mengjie Zhang. The SparseLSR loss function is a significantly faster and more memory-efficient way to compute Label Smoothing Regularization (LSR).
+This repository contains PyTorch code for the Sparse Label Smoothing Regularization (SparseLSR) loss function proposed in the paper "[Learning Symbolic Model-Agnostic Loss Functions via Meta-Learning](https://arxiv.org/abs/2209.08907)" by Christian Raymond, Qi Chen, Bing Xue, and Mengjie Zhang. The SparseLSR loss function is a significantly faster and more memory-efficient way to compute than traditional (non-sparse) Label Smoothing Regularization (LSR).
 
 <p align="center">
   <img src="https://github.com/Decadz/Sparse-Label-Smoothing-Regularization/blob/main/images/sparse-lsr.png" width="750"/>
