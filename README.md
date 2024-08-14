@@ -99,7 +99,7 @@ Regarding the remaining numerically unstable term, this can also be computed sta
   <img src="https://github.com/Decadz/Sparse-Label-Smoothing-Regularization/blob/main/images/equation-15.png"/>
 </p>
 
-### PyTorch Code: 
+### PyTorch Code
 
 ```python
 class SparseLSRLoss(torch.nn.Module):
@@ -129,7 +129,15 @@ class SparseLSRLoss(torch.nn.Module):
         return loss.mean() if self.reduction == "mean" else loss
 ```
 
-### Code Reproducibility: 
+### Visualizing Penultimate Layer Representation
+
+The ```train.py``` script allows you to recreate the penultimate layer representation visualizations from the paper's appendix. In this script, AlexNet is trained on the CIFAR-10 dataset using the cross-entropy loss, label smoothing regularization, and sparse label smoothing regularization. After training, the penultimate layer representations on the testing set are visualized using [t-distributed Stochastic Neighbor Embedding](https://jmlr.org/papers/v9/vandermaaten08a.html) (t-SNE).
+
+<p align="center">
+  <img src="https://github.com/Decadz/Sparse-Label-Smoothing-Regularization/blob/main/images/penultimate-layer-representations.png"/>
+</p>
+
+### Code Reproducibility
 
 The code has not been comprehensively checked and re-run since refactoring. If you're having any issues, find a problem/bug or cannot reproduce similar results as the paper please [open an issue](https://github.com/Decadz/Sparse-Label-Smoothing-Regularization/issues) or email me.
 
