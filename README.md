@@ -120,7 +120,7 @@ class SparseLSRLoss(torch.nn.Module):
         # Extracting the target indexes from the log probabilities.
         log_prob = torch.gather(log_prob, 1, y_target.unsqueeze(1))
 
-        # Calculating the fast label smoothing regularization loss.
+        # Calculating the sparse label smoothing regularization loss.
         loss = - (1 - self.smoothing + (self.smoothing / num_classes)) * log_prob + \
                ((self.smoothing * (num_classes - 1)) / num_classes) * \
                torch.log((torch.clamp(1 - torch.exp(log_prob), min=1e-7))/(num_classes - 1))
